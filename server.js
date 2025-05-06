@@ -62,7 +62,7 @@ ${resume}`;
   try {
     const completion = await openai.chat.completions.create({
       messages: [{ role: 'user', content: prompt }],
-      model: 'gpt-4'
+      model: 'gpt-3.5-turbo'
     });
 
     const html = completion.choices[0].message.content;
