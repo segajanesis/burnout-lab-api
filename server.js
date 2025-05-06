@@ -8,24 +8,28 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: '100kb' }));
 
-// Basic rate limiting: 10 requests per minute per IP
+// Rate limit for /lab-report
 const limiter = rateLimit({
-  windowMs: 60 * 1000,
+  windowMs: 60 * 1000, // 1 minute
   max: 10,
   message: 'Too many requests from this IP, please try again in a minute.',
 });
 app.use('/lab-report', limiter);
 
+// OpenAI setup
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+// Lab report endpoint
 app.post('/lab-report', async (req, res) => {
   const resume = req.body.resume;
 
-  if (!resume || resume.length > 8000) {
-    return res.status(400).send({ error: 'Invalid or too long resume input.' });
+  console.log("Received /lab-report POST request");
+  if (!resume || resume.length < 100 || resume.length > 8000) {
+    console.warn("Invalid resume length:", resume ? resume.length : "undefined");
+    return res.status(400).send({ error: 'Invalid or missing resume input.' });
   }
 
-  const prompt = `Act as Burnout Lab. Analyze this resume and generate the following sections, using raw HTML tags like <h2>, <ul>, <li>, and <p>. Do not use names or personal information.
+  const prompt = \`Act as Burnout Lab. Analyze this resume and generate the following sections, using raw HTML tags like <h2>, <ul>, <li>, and <p>. Do not use names or personal information.
 
 <h2>resume lab</h2>
 - score (0–100) with breakdown:
@@ -39,7 +43,7 @@ app.post('/lab-report', async (req, res) => {
 
 <h2>cert lab</h2>
 - subtitle: certificates to stack the odds
-- 5 certs: name, reason, time, effort level, dummy link
+- 5 certs: name, reason, time, effort level, link to the cert
 
 <h2>role lab</h2>
 - subtitle: easiest pivots, pay, and paths
@@ -53,7 +57,7 @@ app.post('/lab-report', async (req, res) => {
 - we don’t store names, emails, or personal data. this report is yours.
 
 Resume:
-${resume}`;
+\${resume}\`;
 
   try {
     const completion = await openai.chat.completions.create({
@@ -69,6 +73,13 @@ ${resume}`;
   }
 });
 
-app.listen(3001, () => {
-  console.log('Burnout Lab API running on http://localhost:3001');
+// Root test route
+app.get('/', (req, res) => {
+  res.send("Burnout Lab API is live.");
+});
+
+// Start server
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+  console.log(`Burnout Lab API running on http://localhost:${PORT}`);
 });
