@@ -29,7 +29,7 @@ app.post('/lab-report', async (req, res) => {
     return res.status(400).send({ error: 'Invalid or missing resume input.' });
   }
 
-  const prompt = `Act as Burnout Lab. Analyze this resume and generate the following sections, using raw HTML tags like <h2>, <ul>, <li>, and <p>. Do not use names or personal information.
+  const prompt = `Act as Burnout Lab. Analyze this resume and generate the following sections using HTML tags like <h2>, <ul>, <li>, and <p>. Do not use names or personal information. Always complete all sections, even if the resume is short or incomplete.
 
 <h2>resume lab</h2>
 - score (0–100) with breakdown:
@@ -39,19 +39,19 @@ app.post('/lab-report', async (req, res) => {
   • keyword density
   • ATS compatibility
 - 5 strengths
-- 3 weaknesses + fixes
+- 3 weaknesses + specific fixes
 
 <h2>cert lab</h2>
 - subtitle: certificates to stack the odds
-- 5 certs: name, reason, time, effort level, link to the cert
+- 5 certs: name, reason it's relevant to the resume, estimated time to complete, effort level (low or medium), and a real, live link to the cert (e.g., from Coursera, LinkedIn Learning, or similar)
 
 <h2>role lab</h2>
 - subtitle: easiest pivots, pay, and paths
-- 10 roles: name, fit %, salary, fit reason, how to start, Coursera link
+- 10 roles: name, fit %, average US salary, why this is a fit for the resume, how to start (include a cert or course recommendation), and a Coursera or similar link
 
 <h2>interview lab</h2>
 - subtitle: prepare to get hired
-- 10 questions + sample answers
+- 10 insightful questions and strong sample answers tailored to this resume
 
 <h2>lab disclosure</h2>
 - we don’t store names, emails, or personal data. this report is yours.
