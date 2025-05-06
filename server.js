@@ -29,7 +29,7 @@ app.post('/lab-report', async (req, res) => {
     return res.status(400).send({ error: 'Invalid or missing resume input.' });
   }
 
-  const prompt = \`Act as Burnout Lab. Analyze this resume and generate the following sections, using raw HTML tags like <h2>, <ul>, <li>, and <p>. Do not use names or personal information.
+  const prompt = `Act as Burnout Lab. Analyze this resume and generate the following sections, using raw HTML tags like <h2>, <ul>, <li>, and <p>. Do not use names or personal information.
 
 <h2>resume lab</h2>
 - score (0–100) with breakdown:
