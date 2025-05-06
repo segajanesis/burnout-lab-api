@@ -57,7 +57,7 @@ app.post('/lab-report', async (req, res) => {
 - we don’t store names, emails, or personal data. this report is yours.
 
 Resume:
-\${resume}\`;
+${resume}`;
 
   try {
     const completion = await openai.chat.completions.create({
