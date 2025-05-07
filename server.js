@@ -16,7 +16,7 @@ app.use(express.json({ limit: '100kb' }));
 const limiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
   max: 10,
-  message: 'Too many requests from this IP, please try again in a minute.',
+  message: 'unusually large amount of requests. what are you doing over there? try again in a minute.',
 });
 app.use('/lab-report', limiter);
 
