@@ -4,8 +4,12 @@ const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const { OpenAI } = require('openai');
 
+
+
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: 'https://burnoutlab.github.io'
+}));
 app.use(express.json({ limit: '100kb' }));
 
 // Rate limit for /lab-report
