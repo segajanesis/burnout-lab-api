@@ -4,15 +4,30 @@ const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const { OpenAI } = require('openai');
 
-
-
 const app = express();
+
+// allow requests only from approved frontend domains
+const allowedOrigins = [
+  'https://kaiserjane.com',
+  'https://segajanesis.github.io',
+  'http://localhost:3000'
+];
+
 app.use(cors({
-  origin: 'https://burnoutlab.github.io'
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.warn('blocked by cors:', origin);
+      callback(new Error('not allowed by cors'));
+    }
+  }
 }));
+
+// parse json request bodies, with a max size limit
 app.use(express.json({ limit: '100kb' }));
 
-// Rate limit for /lab-report
+// rate limit for /lab-report to prevent abuse
 const limiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
   max: 10,
@@ -20,20 +35,29 @@ const limiter = rateLimit({
 });
 app.use('/lab-report', limiter);
 
-// OpenAI setup
+// openai client setup
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-// Lab report endpoint
+// main lab report endpoint
 app.post('/lab-report', async (req, res) => {
   const resume = req.body.resume;
 
-  console.log("Received /lab-report POST request");
+  console.log("received /lab-report POST request");
   if (!resume || resume.length < 100 || resume.length > 8000) {
-    console.warn("Invalid resume length:", resume ? resume.length : "undefined");
-    return res.status(400).send({ error: 'Invalid or missing resume input.' });
+    console.warn("invalid resume length:", resume ? resume.length : "undefined");
+    return res.status(400).send({ error: 'invalid or missing resume input.' });
   }
 
-  const prompt = `Act as Burnout Lab. Analyze this resume and generate the following sections using HTML tags like <h2>, <ul>, <li>, and <p>. Do not use names or personal information. Always complete all sections, even if the resume is short or incomplete.
+  const prompt = `You will act as burnout lab which is a service geared toward Gen Z and Millenials who are in need of a job switch. 
+  Analyze their resume and generate the following sections using html tags like <h2>, <ul>, <li>, and <p>. do not use names or personal information. 
+  Important: All sections MUST BE COMPLETE before you return your information, which includes: 
+  
+  1. Resume Lab: Must include resume score, 5 strengths, and 3 weaknesses with their suggested fixes. 
+  2. Cert Lab: Must include relevant ertificate Recommendations (you must return at least 2), 
+  3. Role Lab: career switch recommendations with 10 possible careers they would be a good fit for (you must include how well their resume matches the role as a percentage as well as estimate salary information for this position in San Francisco.)
+  4. Quick Switch Companies: any companies (no more than 3, but you must provide 2) that are competitiors to businesses on their resume where the person's experience would count for more,   
+  5. Interview Questions:  they may be asked (you must return at least 5), 
+  6. Questions for Interviewers: Interview questions they could ask their interviewer (you must return at least 2)
 
 <h2>resume lab</h2>
 - score (0–100) with breakdown:
@@ -41,26 +65,29 @@ app.post('/lab-report', async (req, res) => {
   • action verbs
   • quantifiable results
   • keyword density
-  • ATS compatibility
+  • ats compatibility
 - 5 strengths
 - 3 weaknesses + specific fixes
 
 <h2>cert lab</h2>
-- subtitle: certificates to stack the odds
-- 5 certs: name, reason it's relevant to the resume, estimated time to complete, effort level (low or medium), and a real, live link to the cert (e.g., from Coursera, LinkedIn Learning, or similar)
+- Between 2 and 5 certs: name, reason it's relevant to the resume, estimated time to complete
 
 <h2>role lab</h2>
-- subtitle: easiest pivots, pay, and paths
-- 10 roles: name, fit %, average US salary, why this is a fit for the resume, how to start (include a cert or course recommendation), and a Coursera or similar link
+- 10 roles: name, fit %, average us salary, why this is a fit for the resume, how to start (include a cert or course recommendation), and a coursera or similar link
 
-<h2>interview lab</h2>
-- subtitle: prepare to get hired
+<h2>quick switch companies</h2>
+- anywhere from 2 - 3 companies that are similar to places of business the resume mentions the person working at 
+
+<h2>interview questions</h2>
 - 10 insightful questions and strong sample answers tailored to this resume
 
-<h2>lab disclosure</h2>
-- we don’t store names, emails, or personal data. this report is yours.
+<h2>questions for interviewers</h2>
+- 2 insightful questions this person could ask their interviewer at the end of the interview 
 
-Resume:
+<h2>lab disclosure</h2>
+- we don’t store names, emails, resumes, advice, or personal data. the information in this report is yours. once you leave this page, this info will disappear. 
+
+resume:
 ${resume}`;
 
   try {
@@ -72,18 +99,18 @@ ${resume}`;
     const html = completion.choices[0].message.content;
     res.send({ html });
   } catch (error) {
-    console.error('OpenAI error:', error);
-    res.status(500).send({ error: 'Failed to generate report.' });
+    console.error('openai error:', error);
+    res.status(500).send({ error: 'failed to generate report.' });
   }
 });
 
-// Root test route
+// root route to confirm server is running
 app.get('/', (req, res) => {
-  res.send("Burnout Lab API is live.");
+  res.send("burnout lab api is live.");
 });
 
-// Start server
+// start the express server
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-  console.log(`Burnout Lab API running on http://localhost:${PORT}`);
+  console.log(`burnout lab api running on http://localhost:${PORT}`);
 });
