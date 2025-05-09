@@ -48,46 +48,30 @@ app.post('/lab-report', async (req, res) => {
     return res.status(400).send({ error: 'invalid or missing resume input.' });
   }
 
-  const prompt = `You will act as burnout lab which is a service geared toward Gen Z and Millenials who are in need of a job switch. 
-  Analyze their resume and generate the following sections using html tags like <h2>, <ul>, <li>, and <p>. do not use names or personal information. 
-  Important: All sections MUST BE COMPLETE before you return your information, which includes: 
-  
-  1. Resume Lab: Must include resume score, 5 strengths, and 3 weaknesses with their suggested fixes. 
-  2. Cert Lab: Must include relevant ertificate Recommendations (you must return at least 2), 
-  3. Role Lab: career switch recommendations with 10 possible careers they would be a good fit for (you must include how well their resume matches the role as a percentage as well as estimate salary information for this position in San Francisco.)
-  4. Quick Switch Companies: any companies (no more than 3, but you must provide 2) that are competitiors to businesses on their resume where the person's experience would count for more,   
-  5. Interview Questions:  they may be asked (you must return at least 5), 
-  6. Questions for Interviewers: Interview questions they could ask their interviewer (you must return at least 2)
+ const prompt = `Act as Burnout Lab, a career diagnostics tool for Gen Z and millennials switching jobs. Analyze the resume and return the following sections using HTML tags like <h2>, <ul>, <li>, and <p>. Do not use names or personal data. Always complete all sections, even if the resume is short or vague.
 
 <h2>resume lab</h2>
-- score (0–100) with breakdown:
-  • formatting & clarity
-  • action verbs
-  • quantifiable results
-  • keyword density
-  • ats compatibility
-- 5 strengths
-- 3 weaknesses + specific fixes
+Include a score (0–100) based on: formatting & clarity, action verbs, quantifiable results, keyword density, ATS compatibility. Also list 5 strengths and 3 weaknesses with suggested fixes.
 
 <h2>cert lab</h2>
-- Between 2 and 5 certs: name, reason it's relevant to the resume, estimated time to complete
+Suggest 2 to 5 relevant certificates with name, relevance, and estimated time to complete.
 
 <h2>role lab</h2>
-- 10 roles: name, fit %, average us salary, why this is a fit for the resume, how to start (include a cert or course recommendation), and a coursera or similar link
+Suggest 10 career pivots. For each: role name, fit percentage, average salary (San Francisco), why it fits, and how to start (with a course link if possible).
 
 <h2>quick switch companies</h2>
-- anywhere from 2 - 3 companies that are similar to places of business the resume mentions the person working at 
+List 2 to 3 companies similar to those mentioned in the resume where their experience would transfer well.
 
 <h2>interview questions</h2>
-- 10 insightful questions and strong sample answers tailored to this resume
+List 5 to 10 possible interview questions with strong sample answers based on this resume.
 
 <h2>questions for interviewers</h2>
-- 2 insightful questions this person could ask their interviewer at the end of the interview 
+Suggest 2 thoughtful questions this candidate could ask their interviewer.
 
 <h2>lab disclosure</h2>
-- we don’t store names, emails, resumes, advice, or personal data. the information in this report is yours. once you leave this page, this info will disappear. 
+We don’t store resumes or personal data. This report is temporary and disappears when the page closes.
 
-resume:
+Resume:
 ${resume}`;
 
   try {
